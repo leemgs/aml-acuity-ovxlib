@@ -1,21 +1,24 @@
 Name:      aml-acuity-ovxlib
-Summary:   Acuity OVX Library
+Summary:   Amlogic Acuity OpenVX Library
 Version:   6.4.0.10
 Release:   0
 Group:     System/Libraries
-License:   Apache-2.0
+License:   GPLv2
+URL:       https://www.khadas.com/post/npu-toolkit-v6-4-0-10-for-vim3---vim3l-released
 Source0:   %{name}-%{version}.tar.gz
 Source1:   %{name}.manifest
 
 BuildRequires: cmake
+
+ExclusiveArch: %{arm} aarch64
+
 Requires: aml-npu-sdk
 Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
-%define _pcdir  %{_libdir}/pkgconfig
 
 %description
-Amlogic Acuity OVX Library for NN Applications.
+Amlogic Acuity OpenVX Library to run neural network applications.
 
 %package devel
 Summary:   Amlogic Acuity OVX Library (development)
@@ -23,7 +26,7 @@ Group:    System/Libraries
 Requires: %{name} = %{version}-%{release}
 
 %description devel
-Header and Configuration for Amlogic Acuity OVX Library.
+Header and Configuration for Amlogic Acuity OpenVX Library.
 
 %prep
 %setup -q
@@ -42,24 +45,13 @@ cmake \
 	-DBINDIR=%{_bindir} \
 	-DLIBDIR=%{_libdir} \
 	-DINCDIR=%{_includedir}/ovx \
-	-DPCDIR=%{_pcdir}
+	-DPCDIR=%{_libdir}/pkgconfig
 
-make %{?jobs:-j%jobs}
+make %{?_smp_mflags}
 
 %install
-%make_install
-
-%clean
 rm -rf %{buildroot}
-
-%files
-%manifest %{name}.manifest
-%attr(755, root, root)
-%{_libdir}/*.so*
-
-%files devel
-%{_includedir}/ovx/*
-%{_libdir}/pkgconfig/*.pc
+%make_install
 
 %post
 /sbin/ldconfig
@@ -67,4 +59,18 @@ rm -rf %{buildroot}
 %postun
 /sbin/ldconfig
 
+%files
+%manifest %{name}.manifest
+%attr(0755, root, root)
+%license LICENSE
+%{_libdir}/*.so*
+
+%files devel
+%{_includedir}/ovx/*
+%{_libdir}/pkgconfig/*.pc
+
+
 %changelog
+
+* Fri Aug 14 2020 Geunsik Lim <geunsik.lim@samsung.com>
+- Added the spec file to generate a Tizen RPM package
